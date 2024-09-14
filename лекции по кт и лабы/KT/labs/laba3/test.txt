@@ -1,0 +1,23 @@
+fn main() {
+    println!("Hello World");
+    println!("ndjfd");
+    if 3 {
+        println!("1");
+        println!("bdfb");
+    } else {
+        while 3 {
+            println!("1");
+            println!("bdh");
+            if 1 {
+                println!("qqq");
+                println!("qqq");
+            }
+            if 5 {
+                println!("qqqaff");
+            }
+        }
+    }
+    while 2 {
+        println!("jdndn");
+    }
+}

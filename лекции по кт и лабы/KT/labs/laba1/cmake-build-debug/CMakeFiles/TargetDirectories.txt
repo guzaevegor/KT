@@ -1,0 +1,3 @@
+D:/BSUIR/course-2/KT/labs/laba1/cmake-build-debug/CMakeFiles/laba1.dir
+D:/BSUIR/course-2/KT/labs/laba1/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/BSUIR/course-2/KT/labs/laba1/cmake-build-debug/CMakeFiles/rebuild_cache.dir

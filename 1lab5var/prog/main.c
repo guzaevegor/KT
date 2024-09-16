@@ -1,69 +1,89 @@
 /*
 Задание:
-Классический абсолютный путь к файлу в Windows:
-•	латинская буква от A до Z;
-•	двоеточие;
-•	обратный слеш;
-•	0 или более блоков из допустимых символов, разделённых обратными слешами.
+Двоичное, восьмеричное или 16-чное число в синтаксисе FASM (постфиксная форма записи). 16-чное число должно начинаться с цифры от 0 до 9.
+•	регулярное выражение;
+([01]+B) | ([0-7]+[Oo]) | ([0-9A-F]+[Hh]) | (0[A-F0-9]+[Hh])
 
-К допустимым относятся все символы, кроме «*», «|», «\», «:», «"», «<», «>», «?» и «/».
-
-(Для поиска подстрок недопустимым символом пути следует также считать пробел « ».)
-Примеры корректных строк:
-C:\Windows\winmine.exe
-D:\WebServer\home\site.by\www\.htaccess
-Z:\autoexec.bat
-N:\testfile.
-X:\testfile2
+Примеры корректных чисел:
+01101011B
+54212110o
+51245H
+0B8Ch
 */
+
 #include <stdio.h>
 #include <string.h>
 
 #define MAX_PATH_LENGTH 256
 
-// Функция проверки символа на допустимость в начале пути
-int is_valid_drive_letter(char ch) {
-    return ch >= 'A' && ch <= 'Z';
+// Функция проверки, является ли символ цифрой
+int is_digit(char ch) {
+    return ch >= '0' && ch <= '9';
 }
 
-// Функция проверки, что строка не слишком длинная
-int is_valid_length(const char *path) {
-    return strlen(path) < MAX_PATH_LENGTH;
+// Функция преобразования символа к верхнему регистру (для шестнадцатеричных чисел)
+char to_upper(char ch) {
+    if (ch >= 'a' && ch <= 'f') {
+        return ch - ('a' - 'A');
+    }
+    return ch;
 }
 
-// Функция проверки основного тела пути
-int is_valid_path_body(const char *path) {
-    for (int i = 3; path[i] != '\0'; i++) {
-        // Запрещаем двойные слеши
-        if (path[i] == '\\' && path[i + 1] == '\\') {
-            return 0;
-        }
-        // Проверяем недопустимые символы
-        if (strchr("*|:\"<>?/ ", path[i])) {
+// Функция проверки двоичного числа
+int is_valid_binary(const char *num) {
+    size_t len = strlen(num);
+    if (len < 2 || num[len - 1] != 'B') {
+        return 0;
+    }
+    for (size_t i = 0; i < len - 1; i++) {
+        if (num[i] != '0' && num[i] != '1') {
             return 0;
         }
     }
     return 1;
 }
 
-// Функция полной проверки пути
-int is_valid_path(const char *path) {
-    if (!is_valid_length(path)) {
+// Функция проверки восьмеричного числа
+int is_valid_octal(const char *num) {
+    size_t len = strlen(num);
+    if (len < 2 || (num[len - 1] != 'o' && num[len - 1] != 'O')) {
         return 0;
     }
-    if (!is_valid_drive_letter(path[0])) {
-        return 0;
+    for (size_t i = 0; i < len - 1; i++) {
+        if (num[i] < '0' || num[i] > '7') {
+            return 0;
+        }
     }
-    if (path[1] != ':' || path[2] != '\\') {
-        return 0;
-    }
-    return is_valid_path_body(path);
+    return 1;
 }
 
-// Функция для чтения путей из файла
+// Функция проверки шестнадцатеричного числа
+int is_valid_hex(const char *num) {
+    size_t len = strlen(num);
+    if (len < 2 || (num[len - 1] != 'H' && num[len - 1] != 'h')) {
+        return 0;
+    }
+    if (!is_digit(num[0])) {  // Число должно начинаться с цифры
+        return 0;
+    }
+    for (size_t i = 0; i < len - 1; i++) {
+        char upper_char = to_upper(num[i]);
+        if (!is_digit(num[i]) && (upper_char < 'A' || upper_char > 'F')) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+// Функция проверки корректности числа в синтаксисе FASM
+int is_valid_number(const char *num) {
+    return is_valid_binary(num) || is_valid_octal(num) || is_valid_hex(num);
+}
+
+// Функция для обработки ввода чисел из файла
 void process_file_input() {
     char filename[MAX_PATH_LENGTH];
-    char path[MAX_PATH_LENGTH];
+    char number[MAX_PATH_LENGTH];
     FILE *file = NULL;
 
     printf("Введите имя файла (в той же директории, что и .exe): ");
@@ -76,31 +96,31 @@ void process_file_input() {
         return;
     }
 
-    while (fgets(path, MAX_PATH_LENGTH, file) != NULL) {
-        path[strcspn(path, "\n")] = 0;  // Удаляем символ новой строки
-        if (is_valid_path(path)) {
-            printf("Путь корректен: %s\n", path);
+    while (fgets(number, MAX_PATH_LENGTH, file) != NULL) {
+        number[strcspn(number, "\n")] = 0;  // Удаляем символ новой строки
+        if (is_valid_number(number)) {
+            printf("Число корректно: %s\n", number);
         } else {
-            printf("Путь некорректен: %s\n", path);
+            printf("Число некорректно: %s\n", number);
         }
     }
 
     fclose(file);
 }
 
-// Функция для ручного ввода путей
+// Функция для ручного ввода чисел
 void process_manual_input() {
-    char path[MAX_PATH_LENGTH];
+    char number[MAX_PATH_LENGTH];
 
-    printf("Введите абсолютный путь Windows (или 'q' для выхода):\n");
+    printf("Введите число в синтаксисе FASM (или 'q' для выхода):\n");
 
     int exit_flag = 0;
     while (!exit_flag) {
         printf("> ");
-        fgets(path, MAX_PATH_LENGTH, stdin);
+        fgets(number, MAX_PATH_LENGTH, stdin);
 
         // Убедимся, что строка не превышает допустимую длину
-        if (strchr(path, '\n') == NULL) {
+        if (strchr(number, '\n') == NULL) {
             printf("Строка слишком длинная. Попробуйте снова.\n");
             // Очищаем буфер
             while (getchar() != '\n');
@@ -108,16 +128,16 @@ void process_manual_input() {
         }
 
         // Удаляем символ новой строки, если он есть
-        path[strcspn(path, "\n")] = 0;
+        number[strcspn(number, "\n")] = 0;
 
         // Проверяем, хочет ли пользователь выйти
-        if (strcmp(path, "q") == 0) {
+        if (strcmp(number, "q") == 0) {
             exit_flag = 1;
         } else {
-            if (is_valid_path(path)) {
-                printf("Путь корректен.\n");
+            if (is_valid_number(number)) {
+                printf("Число корректно.\n");
             } else {
-                printf("Путь некорректен. Попробуйте снова.\n");
+                printf("Число некорректно. Попробуйте снова.\n");
             }
         }
     }
@@ -128,8 +148,8 @@ int main() {
     char choice;
 
     printf("Выберите режим ввода:\n");
-    printf("1. Считывать пути из файла\n");
-    printf("2. Вводить пути вручную\n");
+    printf("1. Считывать числа из файла\n");
+    printf("2. Вводить числа вручную\n");
     printf("> ");
     choice = getchar();
     getchar();  // Игнорируем символ новой строки после выбора

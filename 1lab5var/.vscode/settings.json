@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "regex.h": "c"
+        "regex.h": "c",
+        "string.h": "c",
+        "ctype.h": "c",
+        "stdio.h": "c"
     }
 }

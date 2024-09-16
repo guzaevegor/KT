@@ -2,167 +2,223 @@
 Задание:
 Двоичное, восьмеричное или 16-чное число в синтаксисе FASM (постфиксная форма записи). 16-чное число должно начинаться с цифры от 0 до 9.
 •	регулярное выражение;
-([01]+B) | ([0-7]+[Oo]) | ([0-9A-F]+[Hh]) | (0[A-F0-9]+[Hh])
-
+([01]+ [Bb]) | ([0-7]+ [Oo]) | ([1-9]+ [A-F]+ [a-f]+ [Hh]) | (0 [A-F]+ [a-f]+ [0-9]+ [Hh])
+Классы:
+Digit ::= [0-9];
+Digit_0 ::= [0];
+Digit_1_9 ::= [1-9];
+Letters_Lower ::= [a-f];
+Letters_Upper ::= [A-F];
+Hex ::= [Hh];
+Bin ::= [Bb];
+Oct ::= [Oo];
+Oct_Digit ::= [0-7];
+Bin_Digit ::= [01];
+Регулярное выражение:
+Number ::= (Bin_Digit+ Bin) | (Oct_Digit+ Oct) | (Digit_1_9+ Letters_Upper+ Letters_Lower+ Hex) | (Digit_0+ Letters_Upper+ Letters_Lower+ Digit+ Hex)
 Примеры корректных чисел:
 01101011B
 54212110o
 51245H
 0B8Ch
 */
-
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_PATH_LENGTH 256
+// Перечисление для типов символов
+typedef enum {
+    CT_UNKNOWN,
+    CT_DIGIT,
+    CT_HEX_LETTER,
+    CT_BIN_SUFFIX,
+    CT_OCT_SUFFIX,
+    CT_HEX_SUFFIX
+} TCharType;
 
-// Функция проверки, является ли символ цифрой
-int is_digit(char ch) {
-    return ch >= '0' && ch <= '9';
+// Перечисление для состояний
+typedef enum {
+    STATE_ERROR,
+    STATE_WAIT_FIRST_DIGIT,
+    STATE_READ_NUMBER,
+    STATE_WAIT_SUFFIX,
+    STATE_READ_SUFFIX
+} TState;
+
+// Структура для конечного автомата
+typedef struct {
+    TState transitions[5][6];   // Матрица переходов состояний
+    int is_final_state[5];      // Финальные состояния
+} DFA;
+
+// Инициализация конечного автомата
+void init_dfa(DFA *dfa) {
+    // Инициализация переходов
+    dfa->transitions[STATE_ERROR][CT_UNKNOWN] = STATE_ERROR;
+    dfa->transitions[STATE_ERROR][CT_DIGIT] = STATE_ERROR;
+    dfa->transitions[STATE_ERROR][CT_HEX_LETTER] = STATE_ERROR;
+    dfa->transitions[STATE_ERROR][CT_BIN_SUFFIX] = STATE_ERROR;
+    dfa->transitions[STATE_ERROR][CT_OCT_SUFFIX] = STATE_ERROR;
+    dfa->transitions[STATE_ERROR][CT_HEX_SUFFIX] = STATE_ERROR;
+
+    dfa->transitions[STATE_WAIT_FIRST_DIGIT][CT_UNKNOWN] = STATE_ERROR;
+    dfa->transitions[STATE_WAIT_FIRST_DIGIT][CT_DIGIT] = STATE_READ_NUMBER;
+    dfa->transitions[STATE_WAIT_FIRST_DIGIT][CT_HEX_LETTER] = STATE_ERROR;
+    dfa->transitions[STATE_WAIT_FIRST_DIGIT][CT_BIN_SUFFIX] = STATE_ERROR;
+    dfa->transitions[STATE_WAIT_FIRST_DIGIT][CT_OCT_SUFFIX] = STATE_ERROR;
+    dfa->transitions[STATE_WAIT_FIRST_DIGIT][CT_HEX_SUFFIX] = STATE_ERROR;
+
+    dfa->transitions[STATE_READ_NUMBER][CT_UNKNOWN] = STATE_ERROR;
+    dfa->transitions[STATE_READ_NUMBER][CT_DIGIT] = STATE_READ_NUMBER;
+    dfa->transitions[STATE_READ_NUMBER][CT_HEX_LETTER] = STATE_READ_NUMBER;
+    dfa->transitions[STATE_READ_NUMBER][CT_BIN_SUFFIX] = STATE_READ_SUFFIX;
+    dfa->transitions[STATE_READ_NUMBER][CT_OCT_SUFFIX] = STATE_READ_SUFFIX;
+    dfa->transitions[STATE_READ_NUMBER][CT_HEX_SUFFIX] = STATE_READ_SUFFIX;
+
+    dfa->transitions[STATE_WAIT_SUFFIX][CT_UNKNOWN] = STATE_ERROR;
+    dfa->transitions[STATE_WAIT_SUFFIX][CT_DIGIT] = STATE_ERROR;
+    dfa->transitions[STATE_WAIT_SUFFIX][CT_HEX_LETTER] = STATE_ERROR;
+    dfa->transitions[STATE_WAIT_SUFFIX][CT_BIN_SUFFIX] = STATE_READ_SUFFIX;
+    dfa->transitions[STATE_WAIT_SUFFIX][CT_OCT_SUFFIX] = STATE_READ_SUFFIX;
+    dfa->transitions[STATE_WAIT_SUFFIX][CT_HEX_SUFFIX] = STATE_READ_SUFFIX;
+
+    dfa->transitions[STATE_READ_SUFFIX][CT_UNKNOWN] = STATE_ERROR;
+    dfa->transitions[STATE_READ_SUFFIX][CT_DIGIT] = STATE_ERROR;
+    dfa->transitions[STATE_READ_SUFFIX][CT_HEX_LETTER] = STATE_ERROR;
+    dfa->transitions[STATE_READ_SUFFIX][CT_BIN_SUFFIX] = STATE_ERROR;
+    dfa->transitions[STATE_READ_SUFFIX][CT_OCT_SUFFIX] = STATE_ERROR;
+    dfa->transitions[STATE_READ_SUFFIX][CT_HEX_SUFFIX] = STATE_ERROR;
+
+    // Инициализация финальных состояний
+    dfa->is_final_state[STATE_ERROR] = 0;
+    dfa->is_final_state[STATE_WAIT_FIRST_DIGIT] = 0;
+    dfa->is_final_state[STATE_READ_NUMBER] = 1;
+    dfa->is_final_state[STATE_WAIT_SUFFIX] = 0;
+    dfa->is_final_state[STATE_READ_SUFFIX] = 1;
 }
 
-// Функция преобразования символа к верхнему регистру (для шестнадцатеричных чисел)
-char to_upper(char ch) {
-    if (ch >= 'a' && ch <= 'f') {
-        return ch - ('a' - 'A');
-    }
-    return ch;
+// Функция классификации символов
+TCharType get_char_type(char c) {
+    if (c == '0' || c == '1') return CT_DIGIT;  // для двоичного числа
+    if (c >= '2' && c <= '7') return CT_DIGIT;  // для восьмеричного числа
+    if (c >= '8' && c <= '9') return CT_DIGIT;  // для десятичных и шестнадцатеричных
+    if (c >= 'A' && c <= 'F') return CT_HEX_LETTER;  // шестнадцатеричные буквы
+    if (c >= 'a' && c <= 'f') return CT_HEX_LETTER;  // шестнадцатеричные буквы в нижнем регистре
+    if (c == 'B' || c == 'b') return CT_BIN_SUFFIX;  // суффикс для двоичного числа
+    if (c == 'O' || c == 'o') return CT_OCT_SUFFIX;  // суффикс для восьмеричного числа
+    if (c == 'H' || c == 'h') return CT_HEX_SUFFIX;  // суффикс для шестнадцатеричного числа
+    return CT_UNKNOWN;  // Любой другой символ считается неизвестным
 }
 
-// Функция проверки двоичного числа
-int is_valid_binary(const char *num) {
-    size_t len = strlen(num);
-    if (len < 2 || num[len - 1] != 'B') {
-        return 0;
-    }
-    for (size_t i = 0; i < len - 1; i++) {
-        if (num[i] != '0' && num[i] != '1') {
-            return 0;
+
+// Функция для проверки строки с помощью конечного автомата
+int check_string(DFA *dfa, const char *s) {
+    TState state = STATE_WAIT_FIRST_DIGIT;
+    int has_hex_letter = 0;  // Флаг наличия шестнадцатеричной буквы
+    for (int i = 0; s[i] != '\0'; i++) {
+        TCharType char_type = get_char_type(s[i]);
+
+        // Если встречен неизвестный символ, сразу переходим в состояние ошибки
+        if (char_type == CT_UNKNOWN) {
+            state = STATE_ERROR;
+            break;
+        }
+
+        state = dfa->transitions[state][char_type];
+
+        // Проверяем наличие шестнадцатеричных букв для шестнадцатеричных чисел
+        if (char_type == CT_HEX_LETTER) {
+            has_hex_letter = 1;
         }
     }
-    return 1;
+
+    // Проверяем финальное состояние
+    if (dfa->is_final_state[state]) {
+        // Если число заканчивается на суффикс для шестнадцатеричных чисел, проверяем наличие букв
+        if (state == STATE_READ_SUFFIX && has_hex_letter) {
+            return 1;  // Корректное шестнадцатеричное число
+        }
+        return 1;  // Корректное двоичное или восьмеричное число
+    }
+
+    return 0;  // Некорректное число
 }
 
-// Функция проверки восьмеричного числа
-int is_valid_octal(const char *num) {
-    size_t len = strlen(num);
-    if (len < 2 || (num[len - 1] != 'o' && num[len - 1] != 'O')) {
-        return 0;
-    }
-    for (size_t i = 0; i < len - 1; i++) {
-        if (num[i] < '0' || num[i] > '7') {
-            return 0;
+
+// Функция для ручного ввода строки
+void process_manual_input(DFA *dfa) {
+    char s[256];
+
+    printf("Введите строку для проверки (или 'q' для выхода):\n");
+    while (1) {
+        printf("> ");
+        fgets(s, 256, stdin);
+
+        // Удаляем символ новой строки
+        s[strcspn(s, "\n")] = 0;
+
+        if (strcmp(s, "q") == 0) {
+            break;
+        }
+
+        if (check_string(dfa, s)) {
+            printf("Строка правильная\n");
+        } else {
+            printf("Строка неправильная\n");
         }
     }
-    return 1;
 }
 
-// Функция проверки шестнадцатеричного числа
-int is_valid_hex(const char *num) {
-    size_t len = strlen(num);
-    if (len < 2 || (num[len - 1] != 'H' && num[len - 1] != 'h')) {
-        return 0;
-    }
-    if (!is_digit(num[0])) {  // Число должно начинаться с цифры
-        return 0;
-    }
-    for (size_t i = 0; i < len - 1; i++) {
-        char upper_char = to_upper(num[i]);
-        if (!is_digit(num[i]) && (upper_char < 'A' || upper_char > 'F')) {
-            return 0;
-        }
-    }
-    return 1;
-}
-
-// Функция проверки корректности числа в синтаксисе FASM
-int is_valid_number(const char *num) {
-    return is_valid_binary(num) || is_valid_octal(num) || is_valid_hex(num);
-}
-
-// Функция для обработки ввода чисел из файла
-void process_file_input() {
-    char filename[MAX_PATH_LENGTH];
-    char number[MAX_PATH_LENGTH];
-    FILE *file = NULL;
-
-    printf("Введите имя файла (в той же директории, что и .exe): ");
-    fgets(filename, MAX_PATH_LENGTH, stdin);
+// Функция для чтения строки из файла и проверки ее с помощью конечного автомата
+void process_file_input(DFA *dfa) {
+    char filename[256];
+    printf("Введите имя файла для чтения: ");
+    fgets(filename, sizeof(filename), stdin);
     filename[strcspn(filename, "\n")] = 0;  // Удаляем символ новой строки
 
-    file = fopen(filename, "r");
-    if (file == NULL) {
-        printf("Не удалось открыть файл %s. Убедитесь, что файл находится в той же директории.\n", filename);
+    FILE *file = fopen(filename, "r");  // Открываем файл для чтения
+    if (!file) {
+        printf("Не удалось открыть файл.\n");
         return;
     }
 
-    while (fgets(number, MAX_PATH_LENGTH, file) != NULL) {
-        number[strcspn(number, "\n")] = 0;  // Удаляем символ новой строки
-        if (is_valid_number(number)) {
-            printf("Число корректно: %s\n", number);
+    char s[256];
+    while (fgets(s, sizeof(s), file)) {
+        // Удаляем символ новой строки
+        s[strcspn(s, "\n")] = 0;
+
+        if (check_string(dfa, s)) {
+            printf("Строка '%s' правильная\n", s);
         } else {
-            printf("Число некорректно: %s\n", number);
+            printf("Строка '%s' неправильная\n", s);
         }
     }
 
-    fclose(file);
+    fclose(file);  // Закрываем файл
 }
 
-// Функция для ручного ввода чисел
-void process_manual_input() {
-    char number[MAX_PATH_LENGTH];
-
-    printf("Введите число в синтаксисе FASM (или 'q' для выхода):\n");
-
-    int exit_flag = 0;
-    while (!exit_flag) {
-        printf("> ");
-        fgets(number, MAX_PATH_LENGTH, stdin);
-
-        // Убедимся, что строка не превышает допустимую длину
-        if (strchr(number, '\n') == NULL) {
-            printf("Строка слишком длинная. Попробуйте снова.\n");
-            // Очищаем буфер
-            while (getchar() != '\n');
-            continue;
-        }
-
-        // Удаляем символ новой строки, если он есть
-        number[strcspn(number, "\n")] = 0;
-
-        // Проверяем, хочет ли пользователь выйти
-        if (strcmp(number, "q") == 0) {
-            exit_flag = 1;
-        } else {
-            if (is_valid_number(number)) {
-                printf("Число корректно.\n");
-            } else {
-                printf("Число некорректно. Попробуйте снова.\n");
-            }
-        }
-    }
-}
-
-// Основная функция программы
+// Главная функция
 int main() {
-    char choice;
+    DFA dfa;
+    int choice;
 
-    printf("Выберите режим ввода:\n");
-    printf("1. Считывать числа из файла\n");
-    printf("2. Вводить числа вручную\n");
+    // Инициализируем автомат
+    init_dfa(&dfa);
+
+    // Выбор между вводом строки вручную или чтением из файла
+    printf("Выберите метод ввода:\n");
+    printf("1. Ввод вручную\n");
+    printf("2. Чтение из файла\n");
     printf("> ");
-    choice = getchar();
-    getchar();  // Игнорируем символ новой строки после выбора
+    scanf("%d", &choice);
+    getchar();  // Очистка буфера после scanf
 
-    if (choice == '1') {
-        process_file_input();
-    } else if (choice == '2') {
-        process_manual_input();
+    if (choice == 1) {
+        process_manual_input(&dfa);
+    } else if (choice == 2) {
+        process_file_input(&dfa);
     } else {
-        printf("Неверный выбор.\n");
-        return 1;
+        printf("Неправильный выбор.\n");
     }
 
-    printf("Программа завершена.\n");
     return 0;
 }

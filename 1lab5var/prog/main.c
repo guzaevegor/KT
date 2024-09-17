@@ -2,223 +2,201 @@
 Задание:
 Двоичное, восьмеричное или 16-чное число в синтаксисе FASM (постфиксная форма записи). 16-чное число должно начинаться с цифры от 0 до 9.
 •	регулярное выражение;
-([01]+ [Bb]) | ([0-7]+ [Oo]) | ([1-9]+ [A-F]+ [a-f]+ [Hh]) | (0 [A-F]+ [a-f]+ [0-9]+ [Hh])
-Классы:
-Digit ::= [0-9];
-Digit_0 ::= [0];
-Digit_1_9 ::= [1-9];
-Letters_Lower ::= [a-f];
-Letters_Upper ::= [A-F];
-Hex ::= [Hh];
-Bin ::= [Bb];
-Oct ::= [Oo];
-Oct_Digit ::= [0-7];
-Bin_Digit ::= [01];
-Регулярное выражение:
-Number ::= (Bin_Digit+ Bin) | (Oct_Digit+ Oct) | (Digit_1_9+ Letters_Upper+ Letters_Lower+ Hex) | (Digit_0+ Letters_Upper+ Letters_Lower+ Digit+ Hex)
-Примеры корректных чисел:
-01101011B
-54212110o
-51245H
-0B8Ch
+
+
+[0–9] ([0–9] | [A–F])* ('b' | 'O' | 'o' | 'H' | 'h')
+
+Классы символов:
+
+DecDigit ::= [0–9]
+HexDigit ::= [A–F]
+Letter ::= 'b' | 'O' | 'o' | 'H' | 'h'
+
+Результирующее регулярное выражение для строк:
+
+Number ::= DecDigit (DecDigit | HexDigit)* Letter
+
 */
 #include <stdio.h>
 #include <string.h>
 
-// Перечисление для типов символов
-typedef enum {
-    CT_UNKNOWN,
-    CT_DIGIT,
-    CT_HEX_LETTER,
-    CT_BIN_SUFFIX,
-    CT_OCT_SUFFIX,
-    CT_HEX_SUFFIX
-} TCharType;
+// тип перечисления включает классы символов
+enum charType {
+    ctUnknown,
+    ctDecDigit,
+    ctHexDigit,
+    ctLetter
+};
 
-// Перечисление для состояний
-typedef enum {
-    STATE_ERROR,
-    STATE_WAIT_FIRST_DIGIT,
-    STATE_READ_NUMBER,
-    STATE_WAIT_SUFFIX,
-    STATE_READ_SUFFIX
-} TState;
+// двумерный массив автоматических переходов
+const int Transitions[4][4] = {
+        {0, 0, 0, 0},
+        {0, 2, 0, 0},
+        {0, 2, 2, 3},
+        {0, 0, 0, 0}
+};
 
-// Структура для конечного автомата
-typedef struct {
-    TState transitions[5][6];   // Матрица переходов состояний
-    int is_final_state[5];      // Финальные состояния
-} DFA;
+const int isFinalState[4] = {
+        0, 0, 0, 1
+};
 
-// Инициализация конечного автомата
-void init_dfa(DFA *dfa) {
-    // Инициализация переходов
-    dfa->transitions[STATE_ERROR][CT_UNKNOWN] = STATE_ERROR;
-    dfa->transitions[STATE_ERROR][CT_DIGIT] = STATE_ERROR;
-    dfa->transitions[STATE_ERROR][CT_HEX_LETTER] = STATE_ERROR;
-    dfa->transitions[STATE_ERROR][CT_BIN_SUFFIX] = STATE_ERROR;
-    dfa->transitions[STATE_ERROR][CT_OCT_SUFFIX] = STATE_ERROR;
-    dfa->transitions[STATE_ERROR][CT_HEX_SUFFIX] = STATE_ERROR;
-
-    dfa->transitions[STATE_WAIT_FIRST_DIGIT][CT_UNKNOWN] = STATE_ERROR;
-    dfa->transitions[STATE_WAIT_FIRST_DIGIT][CT_DIGIT] = STATE_READ_NUMBER;
-    dfa->transitions[STATE_WAIT_FIRST_DIGIT][CT_HEX_LETTER] = STATE_ERROR;
-    dfa->transitions[STATE_WAIT_FIRST_DIGIT][CT_BIN_SUFFIX] = STATE_ERROR;
-    dfa->transitions[STATE_WAIT_FIRST_DIGIT][CT_OCT_SUFFIX] = STATE_ERROR;
-    dfa->transitions[STATE_WAIT_FIRST_DIGIT][CT_HEX_SUFFIX] = STATE_ERROR;
-
-    dfa->transitions[STATE_READ_NUMBER][CT_UNKNOWN] = STATE_ERROR;
-    dfa->transitions[STATE_READ_NUMBER][CT_DIGIT] = STATE_READ_NUMBER;
-    dfa->transitions[STATE_READ_NUMBER][CT_HEX_LETTER] = STATE_READ_NUMBER;
-    dfa->transitions[STATE_READ_NUMBER][CT_BIN_SUFFIX] = STATE_READ_SUFFIX;
-    dfa->transitions[STATE_READ_NUMBER][CT_OCT_SUFFIX] = STATE_READ_SUFFIX;
-    dfa->transitions[STATE_READ_NUMBER][CT_HEX_SUFFIX] = STATE_READ_SUFFIX;
-
-    dfa->transitions[STATE_WAIT_SUFFIX][CT_UNKNOWN] = STATE_ERROR;
-    dfa->transitions[STATE_WAIT_SUFFIX][CT_DIGIT] = STATE_ERROR;
-    dfa->transitions[STATE_WAIT_SUFFIX][CT_HEX_LETTER] = STATE_ERROR;
-    dfa->transitions[STATE_WAIT_SUFFIX][CT_BIN_SUFFIX] = STATE_READ_SUFFIX;
-    dfa->transitions[STATE_WAIT_SUFFIX][CT_OCT_SUFFIX] = STATE_READ_SUFFIX;
-    dfa->transitions[STATE_WAIT_SUFFIX][CT_HEX_SUFFIX] = STATE_READ_SUFFIX;
-
-    dfa->transitions[STATE_READ_SUFFIX][CT_UNKNOWN] = STATE_ERROR;
-    dfa->transitions[STATE_READ_SUFFIX][CT_DIGIT] = STATE_ERROR;
-    dfa->transitions[STATE_READ_SUFFIX][CT_HEX_LETTER] = STATE_ERROR;
-    dfa->transitions[STATE_READ_SUFFIX][CT_BIN_SUFFIX] = STATE_ERROR;
-    dfa->transitions[STATE_READ_SUFFIX][CT_OCT_SUFFIX] = STATE_ERROR;
-    dfa->transitions[STATE_READ_SUFFIX][CT_HEX_SUFFIX] = STATE_ERROR;
-
-    // Инициализация финальных состояний
-    dfa->is_final_state[STATE_ERROR] = 0;
-    dfa->is_final_state[STATE_WAIT_FIRST_DIGIT] = 0;
-    dfa->is_final_state[STATE_READ_NUMBER] = 1;
-    dfa->is_final_state[STATE_WAIT_SUFFIX] = 0;
-    dfa->is_final_state[STATE_READ_SUFFIX] = 1;
+// функция для получения класса символа
+int getCharType(char chr) {
+    if (chr >= '0' && chr <= '9')
+        return ctDecDigit;
+    if (chr >= 'A' && chr <= 'F')
+        return ctHexDigit;
+    if (chr == 'b' || chr == 'O' || chr == 'o' || chr == 'h' || chr == 'H' )
+        return ctLetter;
+    return ctUnknown;
 }
 
-// Функция классификации символов
-TCharType get_char_type(char c) {
-    if (c == '0' || c == '1') return CT_DIGIT;  // для двоичного числа
-    if (c >= '2' && c <= '7') return CT_DIGIT;  // для восьмеричного числа
-    if (c >= '8' && c <= '9') return CT_DIGIT;  // для десятичных и шестнадцатеричных
-    if (c >= 'A' && c <= 'F') return CT_HEX_LETTER;  // шестнадцатеричные буквы
-    if (c >= 'a' && c <= 'f') return CT_HEX_LETTER;  // шестнадцатеричные буквы в нижнем регистре
-    if (c == 'B' || c == 'b') return CT_BIN_SUFFIX;  // суффикс для двоичного числа
-    if (c == 'O' || c == 'o') return CT_OCT_SUFFIX;  // суффикс для восьмеричного числа
-    if (c == 'H' || c == 'h') return CT_HEX_SUFFIX;  // суффикс для шестнадцатеричного числа
-    return CT_UNKNOWN;  // Любой другой символ считается неизвестным
+// функция для сброса автомата
+void reset(int *state, int *startPos, int *pos, int mas[]) {
+    *state = 1;
+    *startPos = *pos + 1;
+    mas[0] = 1;
+    mas[1] = 1;
 }
 
-
-// Функция для проверки строки с помощью конечного автомата
-int check_string(DFA *dfa, const char *s) {
-    TState state = STATE_WAIT_FIRST_DIGIT;
-    int has_hex_letter = 0;  // Флаг наличия шестнадцатеричной буквы
-    for (int i = 0; s[i] != '\0'; i++) {
-        TCharType char_type = get_char_type(s[i]);
-
-        // Если встречен неизвестный символ, сразу переходим в состояние ошибки
-        if (char_type == CT_UNKNOWN) {
-            state = STATE_ERROR;
-            break;
+// главная функция для поиска чисел
+void searchString(char str[]) {
+    int state = 1;
+    int i = 0;
+    int startPos = 0;
+    int isCorrect[] = {1, 1};
+    int count = 0;
+    int j;
+    while (i < strlen(str)) {
+        state = Transitions[state][getCharType(str[i])];
+        if (isFinalState[state] != 1 && str[i] != '0' && str[i] != '1')
+            isCorrect[0] = 0;
+        if (isFinalState[state] != 1 && (getCharType(str[i]) != 1 || str[i] > '7'))
+            isCorrect[1] = 0;
+        if (isFinalState[state] == 1) {
+            if (str[i] == 'b' && isCorrect[0] == 0) {
+                j = i - 1;
+                while (str[j] == '0' || str[j] == '1')
+                    j--;
+                j++;
+                if (j != i) {
+                    while (j <= i) {
+                        putchar(str[j]);
+                        j++;
+                    }
+                    count++;
+                    printf("\n");
+                }
+                reset(&state, &startPos, &i, isCorrect);
+            } else {
+                if ((str[i] == 'o' || str[i] == 'O') && isCorrect[1] == 0) {
+                    j = i - 1;
+                    while (str[j] >= '0' && str[j] <= '7')
+                        j--;
+                    j++;
+                    if (j != i) {
+                        while (j <= i) {
+                            putchar(str[j]);
+                            j++;
+                        }
+                        count++;
+                        printf("\n");
+                    }
+                    reset(&state, &startPos, &i, isCorrect);
+                } else {
+                    count++;
+                    for (j = startPos; j <= i; j++)
+                        putchar(str[j]);
+                    printf("\n");
+                    reset(&state, &startPos, &i, isCorrect);
+                }
+            }
         }
-
-        state = dfa->transitions[state][char_type];
-
-        // Проверяем наличие шестнадцатеричных букв для шестнадцатеричных чисел
-        if (char_type == CT_HEX_LETTER) {
-            has_hex_letter = 1;
+        if (state == 0) {
+            reset(&state, &startPos, &i, isCorrect);
         }
+        i++;
     }
-
-    // Проверяем финальное состояние
-    if (dfa->is_final_state[state]) {
-        // Если число заканчивается на суффикс для шестнадцатеричных чисел, проверяем наличие букв
-        if (state == STATE_READ_SUFFIX && has_hex_letter) {
-            return 1;  // Корректное шестнадцатеричное число
-        }
-        return 1;  // Корректное двоичное или восьмеричное число
-    }
-
-    return 0;  // Некорректное число
+    printf("Найдено чисел: %d\n", count);
 }
 
 
-// Функция для ручного ввода строки
-void process_manual_input(DFA *dfa) {
-    char s[256];
-
-    printf("Введите строку для проверки (или 'q' для выхода):\n");
-    while (1) {
-        printf("> ");
-        fgets(s, 256, stdin);
-
-        // Удаляем символ новой строки
-        s[strcspn(s, "\n")] = 0;
-
-        if (strcmp(s, "q") == 0) {
-            break;
-        }
-
-        if (check_string(dfa, s)) {
-            printf("Строка правильная\n");
-        } else {
-            printf("Строка неправильная\n");
+// функция для поиска всех подстрок и вывода корректных
+void printValidSubstrings(char *s) {
+    printf("Корректные подстроки: \n");
+    char substr[100];
+    for (int i = 0; i < strlen(s); i++) {
+        for (int j = i + 1; j <= strlen(s); j++) {
+            strncpy(substr, s + i, j - i);
+            substr[j - i] = '\0';
+            printf("Проверка подстроки: %s\n", substr);
+            searchString(substr);
         }
     }
 }
-
-// Функция для чтения строки из файла и проверки ее с помощью конечного автомата
-void process_file_input(DFA *dfa) {
-    char filename[256];
-    printf("Введите имя файла для чтения: ");
-    fgets(filename, sizeof(filename), stdin);
-    filename[strcspn(filename, "\n")] = 0;  // Удаляем символ новой строки
-
-    FILE *file = fopen(filename, "r");  // Открываем файл для чтения
-    if (!file) {
-        printf("Не удалось открыть файл.\n");
-        return;
-    }
-
-    char s[256];
-    while (fgets(s, sizeof(s), file)) {
-        // Удаляем символ новой строки
-        s[strcspn(s, "\n")] = 0;
-
-        if (check_string(dfa, s)) {
-            printf("Строка '%s' правильная\n", s);
-        } else {
-            printf("Строка '%s' неправильная\n", s);
-        }
-    }
-
-    fclose(file);  // Закрываем файл
-}
-
-// Главная функция
 int main() {
-    DFA dfa;
-    int choice;
+    FILE *out;
+    char input[100];
+    char filePath[200]; // Буфер для пути к файлу
+    char choice;
 
-    // Инициализируем автомат
-    init_dfa(&dfa);
+    do {
+        printf("\nВыберите действие:\n");
+        printf("0 - ввод из файла\n");
+        printf("1 - ввод с клавиатуры\n");
+        printf("2 - поиск подстрок\n");
+        printf("3 - выход из программы\n");
+        printf("> ");
 
-    // Выбор между вводом строки вручную или чтением из файла
-    printf("Выберите метод ввода:\n");
-    printf("1. Ввод вручную\n");
-    printf("2. Чтение из файла\n");
-    printf("> ");
-    scanf("%d", &choice);
-    getchar();  // Очистка буфера после scanf
+        choice = getchar();
+        getchar(); // чтобы захватить символ новой строки после getchar()
 
-    if (choice == 1) {
-        process_manual_input(&dfa);
-    } else if (choice == 2) {
-        process_file_input(&dfa);
-    } else {
-        printf("Неправильный выбор.\n");
-    }
+        switch (choice) {
+            case '0': {
+                printf("Введите путь к файлу:\n> ");
+                scanf("%s", filePath);
+
+                out = fopen(filePath, "r");
+                if (out == NULL) {
+                    printf("Ошибка: не удалось открыть файл.\n");
+                } else {
+                    fscanf(out, "%s", input);
+                    printf("Строка из файла: %s\n", input);
+                    searchString(input);
+                    fclose(out);
+                }
+                break;
+            }
+
+            case '1': {
+                printf("Введите строку:\n> ");
+                scanf("%s", input);
+                searchString(input);
+                break;
+            }
+
+            case '2': {
+                printf("Введите строку для поиска подстрок:\n> ");
+                scanf("%s", input);
+                printValidSubstrings(input);
+                break;
+            }
+
+            case '3': {
+                printf("Завершение программы. Благодарю за использование.\n");
+                return 0;
+            }
+
+            default: {
+                printf("Ошибка. Введите число заново.\n");
+                break;
+            }
+        }
+        
+        // Очистка буфера для нового ввода
+        getchar(); 
+
+    } while (choice != '3'); // Цикл продолжается, пока не выбран выход ('3')
 
     return 0;
 }

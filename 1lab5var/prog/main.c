@@ -20,6 +20,7 @@ Number ::= DecDigit (DecDigit | HexDigit)* Letter
 #include <stdio.h>
 #include <string.h>
 
+
 // тип перечисления включает классы символов
 enum charType {
     ctUnknown,

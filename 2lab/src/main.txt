@@ -1,0 +1,17 @@
+%option noyywrap
+%{
+int n = 1;
+%}
+
+%%
+
+\n      {
+            printf("\n%d: ", n++);
+        }
+
+%%
+
+int main() {
+    printf("%d: ", n++);
+    yylex();
+}

@@ -285,11 +285,11 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 	*yy_cp = '\0'; \
 	yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 2
-#define YY_END_OF_BUFFER 3
+#define YY_NUM_RULES 3
+#define YY_END_OF_BUFFER 4
 static yyconst short int yy_accept[7] =
     {   0,
-        0,    0,    3,    2,    1,    0
+        0,    0,    4,    2,    1,    0
     } ;
 
 static yyconst int yy_ec[256] =
@@ -363,7 +363,7 @@ char *yytext;
 #line 1 "main.txt"
 #define INITIAL 0
 #line 3 "main.txt"
-int n = 1;
+int nLines = 0, nChars = 0;
 #line 368 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
@@ -605,15 +605,20 @@ case 1:
 YY_RULE_SETUP
 #line 8 "main.txt"
 {
-            printf("\n%d: ", n++);
+          ++nLines; ++nChars;
         }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
 #line 12 "main.txt"
+++nChars;
+	YY_BREAK
+case 3:
+YY_RULE_SETUP
+#line 14 "main.txt"
 ECHO;
 	YY_BREAK
-#line 617 "lex.yy.c"
+#line 622 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1499,10 +1504,11 @@ int main()
 	return 0;
 	}
 #endif
-#line 12 "main.txt"
+#line 14 "main.txt"
 
 
-int main() {
-    printf("%d: ", n++);
-    yylex();
+int main()
+{
+  yylex();
+  printf("Lines: %d. Characters: %d", nLines, nChars);
 }

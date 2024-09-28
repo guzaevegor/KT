@@ -1,0 +1,20 @@
+%option noyywrap
+%{
+int nLines = 0, nChars = 0;
+%}
+
+%%
+
+\n      {
+          ++nLines; ++nChars;
+        }
+
+.       ++nChars;
+
+%%
+
+int main()
+{
+  yylex();
+  printf("Lines: %d. Characters: %d", nLines, nChars);
+}

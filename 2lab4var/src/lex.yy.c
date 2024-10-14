@@ -441,9 +441,16 @@ int yy_flex_debug = 0;
 char *yytext;
 #line 1 "main.l"
 #line 4 "main.l"
+#include <stdio.h>
+#include <stdlib.h>
+
+extern FILE *yyin;
+extern FILE *yyout;
+extern int yylex();
+int isOpenOutFile = 0;
 int line_number = 1;
-#line 446 "lex.yy.c"
-#line 447 "lex.yy.c"
+#line 453 "lex.yy.c"
+#line 454 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -663,9 +670,9 @@ YY_DECL
 		}
 
 	{
-#line 7 "main.l"
+#line 14 "main.l"
 
-#line 669 "lex.yy.c"
+#line 676 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -725,21 +732,21 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 8 "main.l"
+#line 15 "main.l"
 { printf("%d: %s \n", line_number++, yytext); }
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 9 "main.l"
+#line 16 "main.l"
 { }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 11 "main.l"
+#line 18 "main.l"
 ECHO;
 	YY_BREAK
-#line 743 "lex.yy.c"
+#line 750 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1747,11 +1754,86 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 11 "main.l"
+#line 18 "main.l"
 
 
-int main(int argc, char **argv) {
+
+int main() {
+    char inputFilePath[256];
+    char tempFilePath[256];
+    char outputFilePath[256];
+    int isOpenOutFile = 0;
+
+    // Получаем путь к входному файлу от пользователя
+    printf("Enter the path to the input file: ");
+    scanf("%255s", inputFilePath);
+
+    // Открываем входной файл
+    FILE *inputFile = fopen(inputFilePath, "r");
+    if (inputFile == NULL) {
+        perror("Error opening input file");
+        return 1;
+    }
+
+    // Получаем путь к временному файлу от пользователя
+    printf("Enter the path to the temporary file: ");
+    scanf("%255s", tempFilePath);
+
+    // Открываем временный файл для записи
+    FILE *tempFile = fopen(tempFilePath, "w+");
+    if (tempFile == NULL) {
+        perror("Error opening temp file");
+        fclose(inputFile);
+        return 1;
+    }
+
+    // Копируем содержимое из inputFile в tempFile
+    char buffer[256];
+    while (fgets(buffer, sizeof(buffer), inputFile)) {
+        fprintf(tempFile, "%s", buffer);
+    }
+    rewind(tempFile);
+    yyin = tempFile;
+
+    // Запрашиваем у пользователя, куда выводить результат
+    char choice;
+    printf("Where do you want to output the result? (c for console, f for file): ");
+    scanf(" %c", &choice);
+
+    if (choice == 'f' || choice == 'F') {
+        // Получаем путь к выходному файлу от пользователя
+        printf("Enter the path to the output file: ");
+        scanf("%255s", outputFilePath);
+
+        FILE *outputFile = fopen(outputFilePath, "w");
+        if (outputFile == NULL) {
+            perror("Error opening output file");
+            fclose(inputFile);
+            fclose(tempFile);
+            return 1;
+        }
+        yyout = outputFile;
+        isOpenOutFile = 1;
+    } else if (choice == 'c' || choice == 'C') {
+        yyout = stdout;
+    } else {
+        printf("Incorrect input!");
+        fclose(inputFile);
+        fclose(tempFile);
+        return 1;
+    }
+
+    // Запускаем лексический анализ
     yylex();
+
+    // Закрываем файлы
+    fclose(inputFile);
+    fclose(tempFile);
+    if (isOpenOutFile) {
+        fclose(yyout);
+    }
+
     return 0;
 }
+
 

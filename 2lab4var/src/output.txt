@@ -1,3 +1,14 @@
-   Leading spaces
-Trailing spaces   
-   Both   
+
+1:Leading spaces
+
+2:Trailing spaces
+
+3:Trailing spaces
+
+4:Trailing spaces
+
+
+5:   Both   
+
+6: 
+

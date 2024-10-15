@@ -1,6 +1,8 @@
-    Loram inpus 
+    1 Hello world! Hello world! Hello world! Hello world! Hello world! Hello world! Hello world! Hello world! Hello world! Hello world! 
 
-    New and
+    2 The quick brown fox jumps over the lazy dog
 
-    old
+    3 ABCDEFG
+
+    4 dwadwa
 

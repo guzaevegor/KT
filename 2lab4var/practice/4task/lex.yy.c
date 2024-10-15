@@ -442,7 +442,10 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "main.l"
-#line 446 "lex.yy.c"
+#line 3 "main.l"
+int counter = 1;
+#line 448 "lex.yy.c"
+#line 449 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -662,9 +665,9 @@ YY_DECL
 		}
 
 	{
-#line 2 "main.l"
+#line 5 "main.l"
 
-#line 668 "lex.yy.c"
+#line 671 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -725,20 +728,20 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 3 "main.l"
+#line 6 "main.l"
 { printf("\n"); }  // Две и более пустых строки
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 4 "main.l"
-{ printf("    %s\n", yytext); }  // Начало строки с текстом, добавляем 4 пробела
+#line 7 "main.l"
+{ printf("    %d %s\n", counter++, yytext); }  // Добавляем 4 пробела в начало строки
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 6 "main.l"
+#line 9 "main.l"
 ECHO;
 	YY_BREAK
-#line 742 "lex.yy.c"
+#line 745 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1746,7 +1749,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 6 "main.l"
+#line 9 "main.l"
 
 
 int main(int argc, char **argv) {

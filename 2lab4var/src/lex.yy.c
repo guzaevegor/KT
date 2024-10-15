@@ -363,9 +363,10 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static const flex_int16_t yy_accept[9] =
+static const flex_int16_t yy_accept[12] =
     {   0,
-        0,    1,    4,    3,    2,    1,    1,    0
+        0,    1,    4,    3,    2,    1,    1,    2,    1,    1,
+        0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -373,7 +374,7 @@ static const YY_CHAR yy_ec[256] =
         1,    1,    1,    1,    1,    1,    1,    1,    1,    2,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    3,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -400,29 +401,33 @@ static const YY_CHAR yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static const YY_CHAR yy_meta[3] =
+static const YY_CHAR yy_meta[4] =
     {   0,
-        1,    2
+        1,    2,    3
     } ;
 
-static const flex_int16_t yy_base[10] =
+static const flex_int16_t yy_base[15] =
     {   0,
-        0,    4,    4,    6,    6,    0,    0,    6,    2
+        9,    0,   11,   13,    0,    0,    7,    0,    0,    0,
+       13,    3,    5,    6
     } ;
 
-static const flex_int16_t yy_def[10] =
+static const flex_int16_t yy_def[15] =
     {   0,
-        8,    1,    8,    8,    8,    9,    9,    0,    8
+       12,   11,   11,   11,   13,   14,   14,   13,   14,    7,
+        0,   11,   11,   11
     } ;
 
-static const flex_int16_t yy_nxt[9] =
+static const flex_int16_t yy_nxt[17] =
     {   0,
-        4,    5,    7,    8,    6,    3,    8,    8
+        6,    4,    7,    4,    4,    4,    9,    8,    9,   10,
+       11,    5,    3,   11,   11,   11
     } ;
 
-static const flex_int16_t yy_chk[9] =
+static const flex_int16_t yy_chk[17] =
     {   0,
-        1,    1,    9,    3,    2,    8,    8,    8
+        2,    2,    2,   12,   12,   12,   14,   13,   14,    7,
+        3,    1,   11,   11,   11,   11
     } ;
 
 static yy_state_type yy_last_accepting_state;
@@ -440,17 +445,10 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "main.l"
-#line 4 "main.l"
-#include <stdio.h>
-#include <stdlib.h>
-
-extern FILE *yyin;
-extern FILE *yyout;
-extern int yylex();
-int isOpenOutFile = 0;
+#line 3 "main.l"
 int line_number = 1;
-#line 453 "lex.yy.c"
-#line 454 "lex.yy.c"
+#line 451 "lex.yy.c"
+#line 452 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -670,9 +668,9 @@ YY_DECL
 		}
 
 	{
-#line 14 "main.l"
+#line 5 "main.l"
 
-#line 676 "lex.yy.c"
+#line 674 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -700,13 +698,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 9 )
+				if ( yy_current_state >= 12 )
 					yy_c = yy_meta[yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 6 );
+		while ( yy_base[yy_current_state] != 13 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -732,21 +730,20 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 15 "main.l"
-{ printf("%d: %s \n", line_number++, yytext); }
+#line 6 "main.l"
+{ printf("%d:%s\n",line_number++, yytext);  }
 	YY_BREAK
 case 2:
-/* rule 2 can match eol */
 YY_RULE_SETUP
-#line 16 "main.l"
-{ }
+#line 7 "main.l"
+{printf("%s",yytext);}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 18 "main.l"
+#line 9 "main.l"
 ECHO;
 	YY_BREAK
-#line 750 "lex.yy.c"
+#line 747 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1044,7 +1041,7 @@ static int yy_get_next_buffer (void)
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 9 )
+			if ( yy_current_state >= 12 )
 				yy_c = yy_meta[yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
@@ -1072,11 +1069,11 @@ static int yy_get_next_buffer (void)
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 9 )
+		if ( yy_current_state >= 12 )
 			yy_c = yy_meta[yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
-	yy_is_jam = (yy_current_state == 8);
+	yy_is_jam = (yy_current_state == 11);
 
 		return yy_is_jam ? 0 : yy_current_state;
 }
@@ -1754,86 +1751,10 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 18 "main.l"
+#line 9 "main.l"
 
-
-
-int main() {
-    char inputFilePath[256];
-    char tempFilePath[256];
-    char outputFilePath[256];
-    int isOpenOutFile = 0;
-
-    // Получаем путь к входному файлу от пользователя
-    printf("Enter the path to the input file: ");
-    scanf("%255s", inputFilePath);
-
-    // Открываем входной файл
-    FILE *inputFile = fopen(inputFilePath, "r");
-    if (inputFile == NULL) {
-        perror("Error opening input file");
-        return 1;
-    }
-
-    // Получаем путь к временному файлу от пользователя
-    printf("Enter the path to the temporary file: ");
-    scanf("%255s", tempFilePath);
-
-    // Открываем временный файл для записи
-    FILE *tempFile = fopen(tempFilePath, "w+");
-    if (tempFile == NULL) {
-        perror("Error opening temp file");
-        fclose(inputFile);
-        return 1;
-    }
-
-    // Копируем содержимое из inputFile в tempFile
-    char buffer[256];
-    while (fgets(buffer, sizeof(buffer), inputFile)) {
-        fprintf(tempFile, "%s", buffer);
-    }
-    rewind(tempFile);
-    yyin = tempFile;
-
-    // Запрашиваем у пользователя, куда выводить результат
-    char choice;
-    printf("Where do you want to output the result? (c for console, f for file): ");
-    scanf(" %c", &choice);
-
-    if (choice == 'f' || choice == 'F') {
-        // Получаем путь к выходному файлу от пользователя
-        printf("Enter the path to the output file: ");
-        scanf("%255s", outputFilePath);
-
-        FILE *outputFile = fopen(outputFilePath, "w");
-        if (outputFile == NULL) {
-            perror("Error opening output file");
-            fclose(inputFile);
-            fclose(tempFile);
-            return 1;
-        }
-        yyout = outputFile;
-        isOpenOutFile = 1;
-    } else if (choice == 'c' || choice == 'C') {
-        yyout = stdout;
-    } else {
-        printf("Incorrect input!");
-        fclose(inputFile);
-        fclose(tempFile);
-        return 1;
-    }
-
-    // Запускаем лексический анализ
+int main(int argc, char **argv) {
     yylex();
-
-    // Закрываем файлы
-    fclose(inputFile);
-    fclose(tempFile);
-    if (isOpenOutFile) {
-        fclose(yyout);
-    }
-
     return 0;
 }
-
 

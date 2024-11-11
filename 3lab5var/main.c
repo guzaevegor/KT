@@ -17,8 +17,6 @@ typedef enum Types {
     TAB,
     OPEN_BRACKET,
     CLOSE_BRACKET,
-    OPEN_FIGURE,
-    CLOSE_FIGURE,
     PRINTLN,
     IF,
     CONDITION,
@@ -73,16 +71,25 @@ bool owhile() {
 }
 
 bool block() {
+    int initial_indent = 0;
     bool res = true;
-    while (!curr(CLOSE_FIGURE) && res)
-        if (!operator()) res = false;
+    if (curr(TAB)) {
+        initial_indent = token[next++];
+    }
+
+    while (curr(TAB) == initial_indent && res) {
+        if (!operator()) {
+            res = false;
+        }
+    }
+
     return res;
 }
 
 void read() {
     int temp;
     FILE *f;
-    f = fopen("/home/stepanio/projects/bsuir/2-sem/KT/лекции по кт и лабы/KT/labs/laba3/out.txt", "r+t");
+    f = fopen("/home/stepanio/projects/bsuir/2-sem/KT/3lab5var/out.txt", "r+t");
     while (fscanf(f, "%d", &temp) == 1) {
         if ((temp != SPACE) && (temp != NEXT)) {
             token[count++] = temp;

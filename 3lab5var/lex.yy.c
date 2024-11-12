@@ -322,6 +322,9 @@ void yyfree ( void *  );
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
 /* Begin user sect3 */
+
+#define yywrap() (/*CONSTCOND*/1)
+#define YY_SKIP_YYWRAP
 typedef flex_uint8_t YY_CHAR;
 
 FILE *yyin = NULL, *yyout = NULL;
@@ -351,8 +354,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 14
-#define YY_END_OF_BUFFER 15
+#define YY_NUM_RULES 15
+#define YY_END_OF_BUFFER 16
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -360,31 +363,30 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static const flex_int16_t yy_accept[42] =
+static const flex_int16_t yy_accept[34] =
     {   0,
-        0,    0,   15,   14,    1,   14,    2,   14,    5,    6,
-       10,    7,   14,   14,   14,   14,   14,   14,    1,    2,
-        0,   12,   10,    0,    0,    9,    0,    0,    0,    3,
-        0,    0,    0,    0,   11,    4,    0,    0,    8,   13,
-        0
+        0,   14,   16,   15,   13,   12,   11,    8,    9,    7,
+       10,   10,   10,   10,   10,   14,   11,   10,   10,   10,
+        1,    6,   10,   14,   10,   10,    4,   10,    2,    3,
+       10,    5,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
     {   0,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    2,
-        1,    1,    3,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    4,    1,    5,    1,    1,    1,    1,    1,    6,
-        7,    1,    1,    1,    1,    1,    1,    8,    8,    8,
-        8,    8,    8,    8,    8,    8,    8,    9,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,   10,    1,    1,   11,
+        1,    2,    4,    1,    1,    1,    1,    1,    1,    1,
+        1,    4,    4,    1,    4,    1,    4,    5,    5,    5,
+        5,    5,    5,    5,    5,    5,    5,    6,    7,    4,
+        8,    4,    1,    1,    9,    9,    9,    9,    9,    9,
+        9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
+        9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
+        1,    1,    1,    1,    9,    1,    9,    9,    9,    9,
 
-       12,   13,    1,   14,   15,    1,    1,   16,   17,   18,
-        1,   19,    1,   20,   21,   22,    1,    1,   23,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+       10,   11,    9,   12,   13,    9,    9,   14,    9,   15,
+       16,    9,    9,   17,   18,    9,    9,    9,   19,    9,
+        9,    9,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -401,53 +403,46 @@ static const YY_CHAR yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static const YY_CHAR yy_meta[24] =
+static const YY_CHAR yy_meta[20] =
     {   0,
-        1,    2,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1
+        1,    1,    1,    1,    2,    1,    1,    1,    2,    2,
+        2,    2,    2,    2,    2,    2,    2,    2,    2
     } ;
 
-static const flex_int16_t yy_base[43] =
+static const flex_int16_t yy_base[35] =
     {   0,
-        0,    0,   50,   51,   51,   47,   44,   42,   51,   51,
-       38,   51,   33,   28,   30,   32,   21,   26,   51,   35,
-       33,   32,   28,   22,   13,   51,   18,   17,   16,   51,
-       18,   11,   10,   11,   51,   51,    4,   13,   51,   51,
-       51,   23
+        0,   37,   38,   40,   40,   40,   32,   40,   40,   40,
+        0,   22,   19,    9,   22,   31,   27,    0,    8,   14,
+        0,    0,   17,   27,   17,   17,    0,   11,    0,    0,
+       13,    0,   40,   20
     } ;
 
-static const flex_int16_t yy_def[43] =
+static const flex_int16_t yy_def[35] =
     {   0,
-       41,    1,   41,   41,   41,   41,   41,   42,   41,   41,
-       41,   41,   41,   41,   41,   41,   41,   41,   41,   41,
-       42,   42,   41,   41,   41,   41,   41,   41,   41,   41,
-       41,   41,   41,   41,   41,   41,   41,   41,   41,   41,
-        0,   41
+       33,    1,   33,   33,   33,   33,   33,   33,   33,   33,
+       34,   34,   34,   34,   34,   33,   33,   34,   34,   34,
+       34,   34,   34,   33,   34,   34,   34,   34,   34,   34,
+       34,   34,    0,   33
     } ;
 
-static const flex_int16_t yy_nxt[75] =
+static const flex_int16_t yy_nxt[60] =
     {   0,
-        4,    5,    6,    7,    8,    9,   10,   11,   12,    4,
-       13,   14,    4,    4,   15,    4,   16,    4,   17,    4,
-        4,    4,   18,   21,   40,   39,   38,   37,   36,   35,
-       34,   33,   32,   31,   30,   23,   22,   22,   20,   29,
-       28,   27,   26,   25,   24,   23,   22,   20,   19,   41,
-        3,   41,   41,   41,   41,   41,   41,   41,   41,   41,
-       41,   41,   41,   41,   41,   41,   41,   41,   41,   41,
-       41,   41,   41,   41
+        4,    4,    5,    6,    7,    8,    9,   10,   11,   12,
+       13,   11,   14,   11,   11,   11,   11,   11,   15,   21,
+       25,   18,   32,   22,   31,   26,   30,   29,   24,   28,
+       27,   17,   24,   23,   20,   19,   17,   33,   16,    3,
+       33,   33,   33,   33,   33,   33,   33,   33,   33,   33,
+       33,   33,   33,   33,   33,   33,   33,   33,   33
     } ;
 
-static const flex_int16_t yy_chk[75] =
+static const flex_int16_t yy_chk[60] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,   42,   38,   37,   34,   33,   32,   31,
-       29,   28,   27,   25,   24,   23,   22,   21,   20,   18,
-       17,   16,   15,   14,   13,   11,    8,    7,    6,    3,
-       41,   41,   41,   41,   41,   41,   41,   41,   41,   41,
-       41,   41,   41,   41,   41,   41,   41,   41,   41,   41,
-       41,   41,   41,   41
+        1,    1,    1,    1,    1,    1,    1,    1,    1,   14,
+       19,   34,   31,   14,   28,   19,   26,   25,   24,   23,
+       20,   17,   16,   15,   13,   12,    7,    3,    2,   33,
+       33,   33,   33,   33,   33,   33,   33,   33,   33,   33,
+       33,   33,   33,   33,   33,   33,   33,   33,   33
     } ;
 
 static yy_state_type yy_last_accepting_state;
@@ -464,12 +459,75 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "text.l"
-#line 2 "text.l"
+#line 1 "lexer.l"
+#line 3 "lexer.l"
 #include <stdio.h>
-int curr_indent = 0;
-#line 472 "lex.yy.c"
-#line 473 "lex.yy.c"
+#include <stdlib.h>
+
+FILE *outputFile;
+int in_expression = 0;
+int construction_stack[100];
+int stack_top = -1;
+int indent_stack[100];
+int indent_stack_top = -1;
+int current_indent_level = 0;
+int needs_indent = 0;
+
+void push_construction() {
+    construction_stack[++stack_top] = 1;
+}
+
+void pop_construction() {
+    if (stack_top >= 0) stack_top--;
+}
+
+int is_in_construction() {
+    return stack_top >= 0;
+}
+
+void push_indent_level(int level) {
+    indent_stack[++indent_stack_top] = level;
+}
+
+int pop_indent_level() {
+    if (indent_stack_top >= 0) {
+        return indent_stack[indent_stack_top--];
+    }
+    return 0;
+}
+
+void handle_indent_dedent(const char* text) {
+    int new_indent_level = 0;
+    for (int i = 0; text[i] != '\0'; i++) {
+        if (text[i] == '\t') {
+            new_indent_level += 4;  // Настраиваемое значение ширины табуляции
+        } else if (text[i] == ' ') {
+            new_indent_level += 1;
+        }
+    }
+
+    // Проверка флага needs_indent
+    if (needs_indent) {
+        push_indent_level(current_indent_level);
+        current_indent_level += 4;
+        fprintf(outputFile, "INDENT ");
+        needs_indent = 0; // Сбрасываем флаг после добавления INDENT
+    } else if (new_indent_level > current_indent_level) {
+        while (new_indent_level > current_indent_level) {
+            push_indent_level(current_indent_level);
+            current_indent_level += 4;
+            fprintf(outputFile, "INDENT ");
+        }
+    } else if (new_indent_level < current_indent_level) {
+        while (indent_stack_top >= 0 && new_indent_level < current_indent_level) {
+            current_indent_level = pop_indent_level();
+            fprintf(outputFile, "DEDENT ");
+        }
+    }
+}
+
+#line 530 "lex.yy.c"
+#line 531 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -649,6 +707,9 @@ extern int yylex (void);
 #endif
 
 #define YY_RULE_SETUP \
+	if ( yyleng > 0 ) \
+		YY_CURRENT_BUFFER_LVALUE->yy_at_bol = \
+				(yytext[yyleng - 1] == '\n'); \
 	YY_USER_ACTION
 
 /** The main scanner function which does all the work.
@@ -686,10 +747,10 @@ YY_DECL
 		}
 
 	{
-#line 7 "text.l"
+#line 70 "lexer.l"
 
 
-#line 693 "lex.yy.c"
+#line 754 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -704,6 +765,7 @@ YY_DECL
 		yy_bp = yy_cp;
 
 		yy_current_state = (yy_start);
+		yy_current_state += YY_AT_BOL();
 yy_match:
 		do
 			{
@@ -716,13 +778,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 42 )
+				if ( yy_current_state >= 34 )
 					yy_c = yy_meta[yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 51 );
+		while ( yy_base[yy_current_state] != 40 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -747,85 +809,120 @@ do_action:	/* This label is used only to access EOF actions. */
 			goto yy_find_action;
 
 case 1:
-/* rule 1 can match eol */
 YY_RULE_SETUP
-#line 9 "text.l"
-{ printf("NEWLINE\n"); }
+#line 72 "lexer.l"
+{ fprintf(outputFile, "IF "); in_expression = 0; push_construction(); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 11 "text.l"
-{ int new_indent = yyleng; 
-                  if (new_indent > curr_indent) { 
-                      printf("INDENT\n"); 
-                      curr_indent = new_indent;
-                  } else if (new_indent < curr_indent) { 
-                      printf("DEDENT\n"); 
-                      curr_indent = new_indent;
-                  } 
-                }
+#line 73 "lexer.l"
+{ fprintf(outputFile, "ELIF "); in_expression = 0; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 21 "text.l"
-{ printf("FN_DEF\n"); }
+#line 74 "lexer.l"
+{
+    if (is_in_construction()) {
+        fprintf(outputFile, "ELSE ");
+        needs_indent = 1; // Устанавливаем флаг для принудительного добавления INDENT
+        pop_construction(); // Завершаем предыдущую конструкцию if, т.к. else должно быть новым блоком
+        push_construction(); // Начинаем новую конструкцию для else
+    } else {
+        fprintf(outputFile, "Error: unmatched ELSE\n");
+        exit(1);
+    }
+    in_expression = 0; // Сброс флага выражения после else
+}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 23 "text.l"
-{ printf("MAIN\n"); }
+#line 89 "lexer.l"
+{ fprintf(outputFile, "FOR "); in_expression = 0; push_construction(); }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 25 "text.l"
-{ printf("OPEN_PAREN\n"); }
+#line 90 "lexer.l"
+{
+    fprintf(outputFile, "WHILE ");
+    in_expression = 0;
+    push_construction();
+    needs_indent = 1;  // Установка отступа для WHILE
+}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 27 "text.l"
-{ printf("CLOSE_PAREN\n"); }
+#line 97 "lexer.l"
+{ fprintf(outputFile, "IN "); in_expression = 0; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 29 "text.l"
-{ printf("COLON\n"); }
+#line 98 "lexer.l"
+{ fprintf(outputFile, "ASSIGN "); in_expression = 0; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 31 "text.l"
-{ printf("PRINT\n"); }    /* PRINT изменено на текст, не используем имя шаблона */
+#line 99 "lexer.l"
+{ fprintf(outputFile, "COLON "); in_expression = 0; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 33 "text.l"
-{ printf("IF\n"); }
+#line 100 "lexer.l"
+{ fprintf(outputFile, "SEMICOLON "); in_expression = 0; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 35 "text.l"
-{ printf("CONDITION\n"); }  /* COND изменено на текст, не используем имя шаблона */
+#line 102 "lexer.l"
+{
+    if (!in_expression) {
+        fprintf(outputFile, "EXPRESSION ");
+        in_expression = 1;
+    }
+}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 37 "text.l"
-{ printf("ELSE\n"); }
+#line 109 "lexer.l"
+{
+    if (!in_expression) {
+        fprintf(outputFile, "EXPRESSION ");
+        in_expression = 1;
+    }
+}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 39 "text.l"
-{ printf("LITERAL\n"); }   /* LITER изменено на текст, не используем имя шаблона */
+#line 116 "lexer.l"
+{
+    fprintf(outputFile, "OPERATOR ");
+    in_expression = 1;
+}
 	YY_BREAK
 case 13:
+/* rule 13 can match eol */
 YY_RULE_SETUP
-#line 41 "text.l"
-{ printf("WHILE\n"); }
+#line 121 "lexer.l"
+{
+    if (!is_in_construction() || in_expression) {
+        if (!is_in_construction()) {
+            fprintf(outputFile, "\n");
+        }
+    }
+    in_expression = 0;
+}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 43 "text.l"
+#line 130 "lexer.l"
+{
+    handle_indent_dedent(yytext);
+}
+	YY_BREAK
+case 15:
+YY_RULE_SETUP
+#line 134 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 829 "lex.yy.c"
+#line 926 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1110,6 +1207,7 @@ static int yy_get_next_buffer (void)
 	char *yy_cp;
     
 	yy_current_state = (yy_start);
+	yy_current_state += YY_AT_BOL();
 
 	for ( yy_cp = (yytext_ptr) + YY_MORE_ADJ; yy_cp < (yy_c_buf_p); ++yy_cp )
 		{
@@ -1122,7 +1220,7 @@ static int yy_get_next_buffer (void)
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 42 )
+			if ( yy_current_state >= 34 )
 				yy_c = yy_meta[yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
@@ -1150,11 +1248,11 @@ static int yy_get_next_buffer (void)
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 42 )
+		if ( yy_current_state >= 34 )
 			yy_c = yy_meta[yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
-	yy_is_jam = (yy_current_state == 41);
+	yy_is_jam = (yy_current_state == 33);
 
 		return yy_is_jam ? 0 : yy_current_state;
 }
@@ -1269,6 +1367,8 @@ static int yy_get_next_buffer (void)
 	c = *(unsigned char *) (yy_c_buf_p);	/* cast for 8-bit char's */
 	*(yy_c_buf_p) = '\0';	/* preserve yytext */
 	(yy_hold_char) = *++(yy_c_buf_p);
+
+	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = (c == '\n');
 
 	return c;
 }
@@ -1830,6 +1930,47 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 43 "text.l"
+#line 134 "lexer.l"
+
+void emit_remaining_dedents() {
+    while (indent_stack_top >= 0) {
+        pop_indent_level();
+        fprintf(outputFile, "DEDENT ");
+    }
+}
+
+int main() {
+    outputFile = fopen("tokens.txt", "w");
+    if (!outputFile) {
+        puts("Error opening output file");
+        return 1;
+    }
+
+    FILE *inputFile = fopen("in.txt", "r");
+    if (!inputFile) {
+        puts("Error opening input file");
+        return 1;
+    }
+
+    yyin = inputFile;
+    yylex();
+
+    // Вызовем функцию, чтобы закрыть все оставшиеся уровни отступов
+    emit_remaining_dedents();
+
+    fclose(inputFile);
+    fclose(outputFile);
+
+    // Вызываем тест, чтобы напечатать дерево разбора
+    FILE *tokenFile = fopen("tokens.txt", "r");
+    if (tokenFile) {
+        test(tokenFile);
+        fclose(tokenFile);
+    } else {
+        puts("Error opening tokens.txt for parsing");
+    }
+
+    return 0;
+}
 
 

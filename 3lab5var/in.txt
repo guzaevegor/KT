@@ -1,17 +1,15 @@
-if 3:
+while 3:
 	print("1")
 	print("bdfb")
-else:
 	while 3:
 		print("1")
 		print("bdh")
 		if 1:
 			print("qqq")
 			print("qqq")
-		if 5:
+		elif 
 			print("qqqaff")
-	while 3:
-		print("1")
+
 
 
 

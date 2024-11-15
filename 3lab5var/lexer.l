@@ -86,7 +86,12 @@ void handle_indent_dedent(const char* text) {
 
 
 
-"for"        { fprintf(outputFile, "FOR "); in_expression = 0; push_construction(); }
+"for"        { 
+    fprintf(outputFile, "FOR ");
+    in_expression = 0;
+    push_construction();
+    needs_indent = 1;  // Установка отступа для WHILE
+}
 "while" {
     fprintf(outputFile, "WHILE ");
     in_expression = 0;

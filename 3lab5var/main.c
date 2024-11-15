@@ -266,26 +266,21 @@ Node* parseOperatorFor() {
     Node* current = forNode;
     int errorFlag = 0;
 
-    // Parse the loop variable expression
     current->left = tokenCheck(&errorFlag, "EXPRESSION", NODE_OPERATOR_INT);
-
-    // Check for the "IN" keyword and parse the iterable
-    if (!matchToken("IN")) {
-        parseError("Expected 'IN' after FOR");
-        errorFlag = 1;
-    } else {
-        current->right = tokenCheck(&errorFlag, "EXPRESSION", NODE_OPERATOR_INT);
-    }
-
-    // Expect a colon and indentation for the for block
-    if (!matchToken("COLON") || !matchToken("INDENT")) {
-        parseError("Expected COLON and INDENT after FOR");
+    if (!matchToken("COLON")) {
+        parseError("COLON");
         errorFlag = 1;
     }
-
-    // Parse the body of the for loop
-    if (!errorFlag) {
-        current = parseBlockBody(current);
+    if (!matchToken("INDENT")) {
+        parseError("INDENT");
+        errorFlag = 1;
+    }
+    while (!errorFlag && !matchToken("DEDENT")) {
+        current = expressionHandler(forNode, current);
+        if (current == NULL || isError) {
+            errorFlag = 1;
+            break;
+        }
     }
 
     if (errorFlag) {
@@ -294,6 +289,7 @@ Node* parseOperatorFor() {
         puts("Valid FOR construction\n");
     }
 
+ 
     return forNode;
 }
 

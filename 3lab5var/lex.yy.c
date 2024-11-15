@@ -837,11 +837,16 @@ YY_RULE_SETUP
 case 4:
 YY_RULE_SETUP
 #line 89 "lexer.l"
-{ fprintf(outputFile, "FOR "); in_expression = 0; push_construction(); }
+{ 
+    fprintf(outputFile, "FOR ");
+    in_expression = 0;
+    push_construction();
+    needs_indent = 1;  // Установка отступа для WHILE
+}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 90 "lexer.l"
+#line 95 "lexer.l"
 {
     fprintf(outputFile, "WHILE ");
     in_expression = 0;
@@ -851,27 +856,27 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 97 "lexer.l"
+#line 102 "lexer.l"
 { fprintf(outputFile, "IN "); in_expression = 0; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 98 "lexer.l"
+#line 103 "lexer.l"
 { fprintf(outputFile, "ASSIGN "); in_expression = 0; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 99 "lexer.l"
+#line 104 "lexer.l"
 { fprintf(outputFile, "COLON "); in_expression = 0; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 100 "lexer.l"
+#line 105 "lexer.l"
 { fprintf(outputFile, "SEMICOLON "); in_expression = 0; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 102 "lexer.l"
+#line 107 "lexer.l"
 {
     if (!in_expression) {
         fprintf(outputFile, "EXPRESSION ");
@@ -881,7 +886,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 109 "lexer.l"
+#line 114 "lexer.l"
 {
     if (!in_expression) {
         fprintf(outputFile, "EXPRESSION ");
@@ -891,7 +896,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 116 "lexer.l"
+#line 121 "lexer.l"
 {
     fprintf(outputFile, "OPERATOR ");
     in_expression = 1;
@@ -900,7 +905,7 @@ YY_RULE_SETUP
 case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
-#line 121 "lexer.l"
+#line 126 "lexer.l"
 {
     if (!is_in_construction() || in_expression) {
         if (!is_in_construction()) {
@@ -912,17 +917,17 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 130 "lexer.l"
+#line 135 "lexer.l"
 {
     handle_indent_dedent(yytext);
 }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 134 "lexer.l"
+#line 139 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 926 "lex.yy.c"
+#line 931 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1930,7 +1935,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 134 "lexer.l"
+#line 139 "lexer.l"
 
 void emit_remaining_dedents() {
     while (indent_stack_top >= 0) {
